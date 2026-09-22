@@ -618,8 +618,8 @@ th{color:var(--txt-mute);font-weight:600;font-size:12.5px;text-transform:upperca
       <p style="color:var(--txt-mute);font-size:13.5px;margin-bottom:14px">Mã chi nhánh (vd: CN03) là khoá liên kết duy nhất giữa chi nhánh và tài khoản phụ trách — đổi tên/địa chỉ không ảnh hưởng liên kết. Tạm ngưng hoặc đóng hẳn 1 chi nhánh (mất mặt bằng, sửa chữa…) để khách không chọn được nữa khi đặt phòng hoặc báo sự cố.</p>
 
       <div class="toolbar" style="margin-bottom:12px">
-        <input id="qChiNhanh" placeholder="Tìm mã, tên, địa chỉ…" style="flex:1;min-width:180px" oninput="drawChiNhanhList()">
-        <select id="fChiNhanhTrangThai" onchange="drawChiNhanhList()">
+        <input id="qChiNhanh" placeholder="Tìm mã, tên, địa chỉ…" style="flex:1;min-width:180px" oninput="soHienChiNhanh=SO_MOI_TRANG;drawChiNhanhList()">
+        <select id="fChiNhanhTrangThai" onchange="soHienChiNhanh=SO_MOI_TRANG;drawChiNhanhList()">
           <option value="">Mọi trạng thái</option>
           <option value="hoat_dong">Đang hoạt động</option>
           <option value="tam_ngung">Tạm ngưng</option>
@@ -905,8 +905,8 @@ th{color:var(--txt-mute);font-weight:600;font-size:12.5px;text-transform:upperca
       <button class="btn btn-y btn-sm" style="margin-bottom:14px" onclick="openThemTaiKhoan()">+ Thêm tài khoản</button>
       <button class="btn btn-ghost btn-sm" style="margin-bottom:14px;margin-left:8px;color:var(--bad)" onclick="chanBamKep(this,resetAllPassUI)">🔑 Đặt lại mật khẩu hàng loạt</button>
       <div class="toolbar" style="margin-bottom:12px">
-        <input id="qTaiKhoan" placeholder="Tìm tên, tài khoản, chi nhánh…" style="flex:1;min-width:180px" oninput="drawTaiKhoanList()">
-        <select id="fTaiKhoanVaiTro" onchange="drawTaiKhoanList()">
+        <input id="qTaiKhoan" placeholder="Tìm tên, tài khoản, chi nhánh…" style="flex:1;min-width:180px" oninput="soHienTaiKhoan=SO_MOI_TRANG;drawTaiKhoanList()">
+        <select id="fTaiKhoanVaiTro" onchange="soHienTaiKhoan=SO_MOI_TRANG;drawTaiKhoanList()">
           <option value="">Mọi vai trò</option>
           <option value="admin">Quản trị</option>
           <option value="manager">Quản lý chi nhánh</option>
@@ -1900,13 +1900,18 @@ async function loadChiNhanhList(){
   }catch(e){ $('listChiNhanh').innerHTML = '<div class="empty">' + ((e && e.message && e.message.indexOf('chưa có trên hệ thống mới')>=0) ? esc(e.message) : 'Không tải được danh sách chi nhánh.') + '</div>'; }
 }
 
+const SO_MOI_TRANG = 5;   // hiện mặc định 5 dòng, bấm "Xem thêm" lộ dần từng 5 dòng — danh sách
+let soHienChiNhanh = SO_MOI_TRANG, soHienTaiKhoan = SO_MOI_TRANG;   // reset về 5 khi gõ tìm/đổi lọc (xem oninput/onchange), GIỮ NGUYÊN khi danh sách tự tải lại sau sửa/thêm/xoá
+
 function drawChiNhanhList(){
   const q = norm($('qChiNhanh').value);
   const f = $('fChiNhanhTrangThai').value;
   let list = CHINHANH_LIST.filter(c => (!f || c.trangThai===f) && (!q || norm(c.id+' '+c.name+' '+c.address).includes(q)));
   list = list.slice().sort((a,b)=> (a.priority||999) - (b.priority||999) || a.name.localeCompare(b.name));
   if(!list.length){ $('listChiNhanh').innerHTML = '<div class="empty">Không tìm thấy chi nhánh nào.</div>'; return; }
-  $('listChiNhanh').innerHTML = list.map(c => `
+  const conLai = list.length - soHienChiNhanh;
+  const xemThem = conLai > 0 ? `<button class="btn btn-ghost btn-sm" style="width:100%;margin-top:8px" onclick="soHienChiNhanh+=SO_MOI_TRANG;drawChiNhanhList()">Xem thêm (còn ${conLai})</button>` : '';
+  $('listChiNhanh').innerHTML = list.slice(0, soHienChiNhanh).map(c => `
     <div class="lrow" data-p="${CN_TRANGTHAI_PRI[c.trangThai]||4}">
       <div class="lrow-main">
         <div class="lrow-name">${esc(c.name)} <span class="st-pill">${esc(c.id)}</span> <span class="pri pri-${CN_TRANGTHAI_PRI[c.trangThai]||4}">${CN_TRANGTHAI_LABEL[c.trangThai]||c.trangThai}</span></div>
@@ -1926,7 +1931,7 @@ function drawChiNhanhList(){
           </div>
         </div>
       </div>
-    </div>`).join('');
+    </div>`).join('') + xemThem;
 }
 
 async function capNhatTrangThaiChiNhanh(id, trangThai){
@@ -3732,7 +3737,9 @@ function drawTaiKhoanList(){
   const f = $('fTaiKhoanVaiTro').value;
   let list = TAIKHOAN_LIST.filter(u => (!f || u.vaitro===f) && (!q || norm(u.taikhoan+' '+u.hoten+' '+u.chinhanhTen).includes(q)));
   if(!list.length){ $('listTaiKhoan').innerHTML = '<div class="empty">Không tìm thấy tài khoản nào.</div>'; return; }
-  $('listTaiKhoan').innerHTML = list.map(u => `
+  const conLai = list.length - soHienTaiKhoan;
+  const xemThem = conLai > 0 ? `<button class="btn btn-ghost btn-sm" style="width:100%;margin-top:8px" onclick="soHienTaiKhoan+=SO_MOI_TRANG;drawTaiKhoanList()">Xem thêm (còn ${conLai})</button>` : '';
+  $('listTaiKhoan').innerHTML = list.slice(0, soHienTaiKhoan).map(u => `
     <div class="lrow" data-p="${u.kichhoat?4:1}">
       <div class="lrow-main">
         <div class="lrow-name">${esc(u.hoten||u.taikhoan)} <span class="st-pill">${esc(ROLE_LABEL[u.vaitro]||u.vaitro)}</span>${u.sieuAdmin?' <span class="pri pri-4">🌟 Siêu admin</span>':''}${u.kichhoat?'':' <span class="pri pri-1">Đã tắt</span>'}${(u.vaitro!=='admin'&&!u.doiMkBat)?' <span class="pri pri-1" title="Tài khoản này chưa được mở quyền tự đổi mật khẩu">🔒 Khoá đổi MK</span>':''}</div>
@@ -3748,7 +3755,7 @@ function drawTaiKhoanList(){
           <button class="kebab-item bad" onclick="chanBamKep(this,xoaTaiKhoanUI,'${esc(u.taikhoan)}')">Xoá</button>
         </div>
       </div>
-    </div>`).join('');
+    </div>`).join('') + xemThem;
 }
 
 /** Hiện đúng trạng thái khoá/mở của tính năng "Đổi mật khẩu của tôi" — admin có thể khoá riêng
