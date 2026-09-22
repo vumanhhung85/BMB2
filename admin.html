@@ -899,47 +899,6 @@ th{color:var(--txt-mute);font-weight:600;font-size:12.5px;text-transform:upperca
       </div>
     </div>
 
-    <div class="form-card ff-collapse" style="max-width:640px">
-      <button class="ff-head" onclick="this.closest('.form-card').classList.toggle('open'); if(this.closest('.form-card').classList.contains('open')) loadBackupInfo();">
-        <div>
-          <h3 style="font-size:18px;margin-bottom:6px">Sao lưu Google Drive (tài khoản khác)</h3>
-          <p style="color:var(--txt-mute);font-size:13.5px">Sao lưu Sheet + toàn bộ ảnh (sự cố, chi nhánh) sang Drive của 1 tài khoản Google riêng, phòng khi tài khoản chính gặp sự cố.</p>
-        </div>
-        <span class="ff-toggle"><span class="ff-txt-closed">Xem thêm</span><span class="ff-txt-open">Thu gọn</span><span class="ff-chevron">▾</span></span>
-      </button>
-      <div class="ff-body">
-        <div style="background:var(--plum2);border:1px solid var(--line-soft);border-radius:12px;padding:12px 14px;font-size:13px;margin-bottom:16px">
-          <b>Cách nối 2 tài khoản Google:</b>
-          <ol style="margin:8px 0 0;padding-left:20px;color:var(--txt-mute)">
-            <li>Đăng nhập Google Drive bằng tài khoản <b>khác</b> (tài khoản muốn giữ bản sao lưu) → tạo 1 thư mục mới.</li>
-            <li>Chia sẻ (Share) thư mục đó, cấp quyền <b>Người chỉnh sửa (Editor)</b> cho email: <b id="bkEmail" style="color:var(--yellow)">đang tải…</b> (chính là tài khoản đang chạy hệ thống này).</li>
-            <li>Mở thư mục đó, copy đoạn ID trong đường link (phần sau <code>/folders/</code>) → dán vào ô bên dưới → Lưu.</li>
-          </ol>
-        </div>
-        <div class="field">
-          <label for="bkFolderId">ID thư mục Google Drive (tài khoản khác)</label>
-          <div style="display:flex;gap:8px">
-            <input id="bkFolderId" placeholder="Dán ID thư mục vào đây" style="flex:1">
-            <button class="btn btn-y btn-sm" onclick="chanBamKep(this,luuBackupFolder)">Lưu</button>
-          </div>
-        </div>
-        <button class="btn btn-ok btn-sm" onclick="chayBackup()" id="btnChayBackup">💾 Sao lưu ngay</button>
-        <div style="font-size:12px;color:var(--txt-mute);margin-top:8px">Sheet lưu theo từng lần bấm (giữ lại lịch sử). Ảnh đồng bộ tăng dần — chỉ copy ảnh mới, không tạo trùng dù bấm nhiều lần. Nếu có rất nhiều ảnh tích luỹ từ trước, lần đầu sao lưu có thể cần bấm lại 1-2 lần mới copy hết (mỗi lần chạy sẽ tiếp tục đúng chỗ dở dang, không mất tiến độ).</div>
-        <div id="bkKetQua" style="font-size:12.5px;color:var(--txt-mute);margin-top:10px"></div>
-
-        <div style="border-top:1px solid var(--line-soft);margin:16px 0 14px"></div>
-        <div class="field">
-          <label for="bkSoNgay">Tự động sao lưu định kỳ mỗi (ngày) — 0 = tắt</label>
-          <div style="display:flex;gap:8px">
-            <input id="bkSoNgay" type="number" min="0" max="90" step="1" style="flex:1">
-            <button class="btn btn-y btn-sm" onclick="chanBamKep(this,luuLichBackup)">Lưu lịch</button>
-          </div>
-          <div style="font-size:12px;color:var(--txt-mute);margin-top:4px">Chạy tự động lúc 2h sáng, không cần ai bấm nút. Đổi số ngày ở đây bất cứ lúc nào, không cần sửa code hay deploy lại.</div>
-        </div>
-        <div id="bkLichTrangThai" style="font-size:12.5px;color:var(--txt-mute)"></div>
-      </div>
-    </div>
-
     <div class="form-card">
       <h3 style="font-size:18px;margin-bottom:6px">Quản lý tài khoản</h3>
       <p style="color:var(--txt-mute);font-size:13.5px;margin-bottom:14px">Thêm tài khoản mới cho quản lý chi nhánh hoặc kỹ thuật, sửa thông tin, đổi mật khẩu, vô hiệu hoá tạm thời hoặc xoá hẳn — có hiệu lực ngay, đăng xuất khỏi mọi thiết bị của người đó lập tức khi vô hiệu hoá/đổi mật khẩu/xoá.</p>
@@ -1464,7 +1423,7 @@ async function chanBamKep(btn, fn, ...args){
  *   - Lỗi BAN_DANG_BAN_THU_LAI (máy chủ chưa giữ được khoá ghi, xem khoaHoacBan_ trong Code.gs): CHỨNG
  *     MINH request chưa hề chạm tới dữ liệu → an toàn tự gửi lại dù là action ghi nào. */
 const ACTION_CHI_DOC = ['khoi_dong','list','suco_list','suco_lichsu','suco_list_da_xoa','kythuat_list',
-  'kythuat_vitri_list','loaisuco_list','taikhoan_list','chinhanh_list','backup_thongtin','telegram_thongtin',
+  'kythuat_vitri_list','loaisuco_list','taikhoan_list','chinhanh_list','telegram_thongtin',
   'truycap_thongke','truycap_thongke_trangchu'];
 const API_TIMEOUT_MS = 25000;   // GAS lúc "khởi động lạnh" có thể mất tới ~10 giây — để rộng 25 giây
 
@@ -1938,7 +1897,7 @@ async function loadChiNhanhList(){
     if(!j.ok) throw new Error(j.error);
     CHINHANH_LIST = j.data;
     drawChiNhanhList();
-  }catch(e){ $('listChiNhanh').innerHTML = '<div class="empty">Không tải được danh sách chi nhánh.</div>'; }
+  }catch(e){ $('listChiNhanh').innerHTML = '<div class="empty">' + ((e && e.message && e.message.indexOf('chưa có trên hệ thống mới')>=0) ? esc(e.message) : 'Không tải được danh sách chi nhánh.') + '</div>'; }
 }
 
 function drawChiNhanhList(){
@@ -2384,7 +2343,7 @@ function switchTab(el){
     capNhatUIVanTay();
     capNhatUIDoiMK();
     capNhatUITelegramId();
-    if(SESSION.role==='admin'){ fillCfgInputs(); loadChiNhanhList(); loadTaiKhoanList(); loadLoaiSuCo().then(drawLoaiSuCoList); loadBackupInfo(); }
+    if(SESSION.role==='admin'){ fillCfgInputs(); loadChiNhanhList(); loadTaiKhoanList(); loadLoaiSuCo().then(drawLoaiSuCoList); }
   }
   else if(isReportView) drawReport();
   else draw();
@@ -3744,64 +3703,6 @@ async function guiThuTelegram(){
   finally{ btn.disabled = false; btn.innerHTML = '📨 Gửi thử'; }
 }
 
-async function loadBackupInfo(){
-  $('bkEmail').textContent = 'đang tải…';
-  try{
-    const j = await api({action:'backup_thongtin'});
-    if(!j.ok) throw new Error(j.error);
-    $('bkEmail').textContent = j.email;
-    $('bkFolderId').value = j.folderId;
-    $('bkSoNgay').value = j.tuDongSoNgay || 0;
-    $('bkLichTrangThai').textContent = j.tuDongSoNgay
-      ? 'Đang bật — tự sao lưu mỗi ' + j.tuDongSoNgay + ' ngày, lúc 2h sáng.'
-      : 'Đang tắt — chỉ sao lưu khi bấm nút.';
-    if(j.lanCuoiLoi) $('bkKetQua').innerHTML = '⚠️ Lần gần nhất lỗi: '+esc(j.lanCuoiLoi);
-    else if(j.lanCuoiLuc) $('bkKetQua').innerHTML = '✅ Lần sao lưu gần nhất: '+fmtVN(j.lanCuoiLuc)+' — '+esc(j.lanCuoiTen);
-    else $('bkKetQua').textContent = 'Chưa từng sao lưu.';
-  }catch(e){ $('bkEmail').textContent = 'Không tải được.'; }
-}
-
-async function luuLichBackup(){
-  const soNgay = Number($('bkSoNgay').value);
-  if(isNaN(soNgay) || soNgay < 0) return toast('Nhập số ngày ≥ 0 (0 = tắt).','bad');
-  try{
-    const j = await api({action:'backup_lich', soNgay});
-    if(!j.ok){ const err = new Error(j.error); err.chiTiet = j.chiTiet; throw err; }
-    $('bkLichTrangThai').textContent = soNgay
-      ? 'Đang bật — tự sao lưu mỗi ' + soNgay + ' ngày, lúc 2h sáng.'
-      : 'Đang tắt — chỉ sao lưu khi bấm nút.';
-    toast(soNgay ? 'Đã bật lịch tự động mỗi '+soNgay+' ngày.' : 'Đã tắt lịch tự động.','ok');
-  }catch(e){
-    toast(e.chiTiet ? ('Không lưu được lịch — lỗi thật: '+e.chiTiet) : 'Không lưu được lịch.', 'bad');
-  }
-}
-
-async function luuBackupFolder(){
-  const id = $('bkFolderId').value.trim();
-  if(!id) return toast('Dán ID thư mục trước.','bad');
-  try{
-    const j = await api({action:'settings_set', key:'backup_drive_folder_id', value:id});
-    if(!j.ok) throw new Error(j.error);
-    toast('Đã lưu ID thư mục.','ok');
-  }catch(e){ toast('Không lưu được.','bad'); }
-}
-
-async function chayBackup(){
-  const btn = $('btnChayBackup');
-  btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Đang sao lưu…';
-  try{
-    const j = await api({action:'backup_chay'});
-    if(!j.ok) throw new Error(j.error);
-    $('bkKetQua').innerHTML = '✅ Vừa sao lưu xong lúc '+fmtVN(new Date().toISOString())+' — '+esc(j.ten)+(j.soAnhMoi?' + '+j.soAnhMoi+' file ảnh mới':' (không có ảnh mới)');
-    toast('Đã sao lưu thành công.','ok');
-  }catch(e){
-    const map = {NO_FOLDER:'Chưa lưu ID thư mục.', FOLDER_NOT_FOUND:'Không mở được thư mục — kiểm tra lại ID và đã chia sẻ quyền chỉnh sửa cho đúng email chưa.', BACKUP_LOI:'Sao lưu thất bại, thử lại.'};
-    toast(map[e.message] || 'Không sao lưu được.','bad');
-    $('bkKetQua').textContent = map[e.message] || 'Sao lưu thất bại.';
-  }
-  finally{ btn.disabled = false; btn.innerHTML = '💾 Sao lưu ngay'; }
-}
-
 async function luuCfgSo(key, inputId, multiplier){
   const raw = Number($(inputId).value);
   if(!raw || raw <= 0) return toast('Nhập một số lớn hơn 0.','bad');
@@ -3823,7 +3724,7 @@ async function loadTaiKhoanList(){
     if(!j.ok) throw new Error(j.error);
     TAIKHOAN_LIST = j.data;
     drawTaiKhoanList();
-  }catch(e){ $('listTaiKhoan').innerHTML = '<div class="empty">Không tải được danh sách tài khoản.</div>'; }
+  }catch(e){ $('listTaiKhoan').innerHTML = '<div class="empty">' + ((e && e.message && e.message.indexOf('chưa có trên hệ thống mới')>=0) ? esc(e.message) : 'Không tải được danh sách tài khoản.') + '</div>'; }
 }
 
 function drawTaiKhoanList(){
