@@ -2296,16 +2296,18 @@ setInterval(()=>{
   $('idleTxt').textContent = m<=5 ? 'Tự đăng xuất sau ' + m + ' phút' : '';
 },20000);
 
+/** Đăng xuất — tải lại HẲN trang thay vì tự tay xoá từng biến toàn cục. Lý do: TAB (đang xem tab
+ *  nào), BOOKING_VIEW, và nhiều biến trạng thái khác không được đăng xuất reset (chỉ SESSION/DATA/
+ *  SUCO/KYTHUAT/TAIKHOAN_LIST có), nên đổi tài khoản trên CÙNG 1 trang dễ giữ sót trạng thái của
+ *  người TRƯỚC — đúng lỗi đã gặp 19/09/2026 với khung Cài đặt (đã vá riêng lẻ), giờ lộ thêm ở tab Sự
+ *  cố (TAB vẫn còn 'baotri' từ phiên trước, vào lại tưởng mới nhưng nội dung cũ chưa kịp vẽ lại). Tải
+ *  lại trang xoá sạch TOÀN BỘ biến JS trong bộ nhớ, chặn đứt cả lớp lỗi này, không phải vá từng biến
+ *  một mỗi lần phát hiện thêm. Thông điệp (reason) gửi qua sessionStorage vì tải lại trang xoá hết
+ *  biến JS, không truyền thẳng được. */
 function logout(reason){
-  SESSION = null; DATA = []; lastPendingSeen = null;
-  SUCO = []; KYTHUAT = []; lastSuCoOpenSeen = null; TAIKHOAN_LIST = [];
   localStorage.removeItem(CFG.PREFIX+'s');
-  clearTimeout(idleTimer); idleAt = null;
-  $('app').style.display='none'; $('login').style.display='grid';
-  $('uPass').value='';
-  $('favicon').href = 'Logo_BoomBox.png';
-  capNhatNutVanTayLogin();   // đăng xuất KHÔNG xoá vân tay đã bật — chỉ về lại màn đăng nhập, nút vân tay vẫn hiện nếu đã bật trên máy này
-  if(reason) showLoginMsg(reason);
+  if(reason) sessionStorage.setItem(CFG.PREFIX+'logoutMsg', reason);
+  location.reload();
 }
 
 /* ─── TẢI ĐƠN ─── */
@@ -4061,6 +4063,11 @@ async function toggleLoaiSuCoActive(ma, bat){
   const s = localStorage.getItem(CFG.PREFIX+'s');
   if(s){ try{ SESSION = JSON.parse(s); enterApp(); return; }catch(e){} }
   capNhatNutVanTayLogin();
+  // Thông điệp đăng xuất (nếu logout() có kèm lý do) gửi qua sessionStorage vì tải lại trang xoá hết
+  // biến JS — đọc ra rồi xoá luôn, không thì lần load trang sau (không phải do đăng xuất) lại hiện
+  // nhầm thông điệp cũ.
+  const msgDangXuat = sessionStorage.getItem(CFG.PREFIX+'logoutMsg');
+  if(msgDangXuat){ sessionStorage.removeItem(CFG.PREFIX+'logoutMsg'); showLoginMsg(msgDangXuat); }
   // Trình duyệt/bàn phím đôi khi tự điền sẵn mật khẩu đã lưu (do có autocomplete="current-password")
   // ngay cả khi người dùng CHƯA bấm hay gõ gì — nhìn vào chấm ẩn tưởng "đã nhập mật khẩu" trong khi
   // chỉ là gợi ý tự động, dễ đăng nhập nhầm bằng mật khẩu cũ đã lưu của người khác dùng chung máy.
