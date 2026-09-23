@@ -565,51 +565,101 @@ th{color:var(--txt-mute);font-weight:600;font-size:12.5px;text-transform:upperca
 
   <!-- ══════════ CÀI ĐẶT ══════════ -->
   <div id="caidat" style="display:none">
-    <div id="caidatAdmin" style="display:none">
-    <div class="form-card ff-collapse">
-      <button class="ff-head" onclick="this.closest('.form-card').classList.toggle('open'); if(this.closest('.form-card').classList.contains('open')) xemLuuLuongTruyCap();">
-        <div>
-          <h3 style="font-size:18px;margin-bottom:6px">📊 Lưu lượng truy cập</h3>
-          <p style="color:var(--txt-mute);font-size:13.5px">Số lượt đăng nhập theo ngày/giờ/chi nhánh/tài khoản — chỉ để xem xu hướng, không có hành động nào ở đây.</p>
-        </div>
-        <span class="ff-toggle"><span class="ff-txt-closed">Xem thêm</span><span class="ff-txt-open">Thu gọn</span><span class="ff-chevron">▾</span></span>
-      </button>
-      <div class="ff-body">
-        <div class="toolbar" style="margin-bottom:12px">
-          <select id="ttNguonDuLieu" onchange="xemLuuLuongTruyCap()">
-            <option value="dangnhap">🔑 Đăng nhập (nội bộ)</option>
-            <option value="trangchu">🌐 Trang chủ (khách)</option>
-          </select>
-          <select id="ttSoNgay" onchange="xemLuuLuongTruyCap()">
-            <option value="7">7 ngày gần nhất</option>
-            <option value="30" selected>30 ngày gần nhất</option>
-            <option value="90">90 ngày gần nhất</option>
-          </select>
-        </div>
-        <div id="ttThan"><div class="sk" style="height:140px"></div></div>
-      </div>
-    </div>
-
+    <div class="caidat-admin-only" style="display:none">
     <div class="form-card ff-collapse">
       <button class="ff-head" onclick="this.closest('.form-card').classList.toggle('open')">
         <div>
-          <h3 style="font-size:18px;margin-bottom:6px">Chức năng giữ phòng đặt chỗ</h3>
-          <p style="color:var(--txt-mute);font-size:13.5px">Bật/tắt nút "Giữ phòng" trên trang khách.</p>
+          <h3 style="font-size:18px;margin-bottom:6px">Danh mục loại sự cố</h3>
+          <p style="color:var(--txt-mute);font-size:13.5px">Thêm/sửa/ẩn loại sự cố dùng trong form Báo sự cố.</p>
         </div>
         <span class="ff-toggle"><span class="ff-txt-closed">Xem thêm</span><span class="ff-txt-open">Thu gọn</span><span class="ff-chevron">▾</span></span>
       </button>
       <div class="ff-body">
-      <p style="color:var(--txt-mute);font-size:13.5px">Khi tắt, trang khách sẽ ẩn nút "Giữ phòng" và máy chủ từ chối mọi đơn mới gửi lên. Đơn cũ vẫn xem và xử lý bình thường trong các tab bên trên.</p>
-      <div class="switch-row">
-        <div>
-          <b id="bkStatusTxt">Đang bật</b>
-          <div style="font-size:12.5px;color:var(--txt-mute)">Khách có thể giữ phòng qua trang chủ</div>
+      <p style="color:var(--txt-mute);font-size:13.5px;margin-bottom:14px">Thêm loại sự cố hay gặp, sửa mức độ ưu tiên mặc định, hoặc ẩn loại không còn dùng — áp dụng ngay cho form Báo sự cố, không cần sửa code.</p>
+      <div id="listLoaiSuCo" style="margin-bottom:14px"></div>
+      <button class="btn btn-y btn-sm" onclick="openThemLoaiSuCo()">+ Thêm loại sự cố</button>
+
+      <div class="form-card" id="formLoaiSuCo" style="display:none;margin-top:14px;padding:16px;max-width:640px">
+        <h3 id="lscTieuDe" style="font-size:15px;margin-bottom:12px">Thêm loại sự cố mới</h3>
+        <div class="field">
+          <label for="lscTen">Tên hiển thị</label>
+          <input id="lscTen" placeholder="vd: Hỏng máy lạnh phòng VIP" maxlength="80">
         </div>
-        <label class="switch">
-          <input type="checkbox" id="bkToggle" checked onchange="toggleBookingSetting()">
-          <span class="track"></span>
-        </label>
+        <div class="field">
+          <label>Mức độ ưu tiên mặc định</label>
+          <div id="lscMucDoPick" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+        </div>
+        <div class="field">
+          <label for="lscLoaiKT">Loại kỹ thuật phụ trách</label>
+          <select id="lscLoaiKT">
+            <option value="chung">Kỹ thuật chung</option>
+            <option value="mang">Kỹ thuật mạng</option>
+          </select>
+        </div>
+        <div class="bk-act" style="margin-top:6px">
+          <button class="btn btn-y btn-sm" onclick="chanBamKep(this,submitLoaiSuCo)">Lưu</button>
+          <button class="btn btn-ghost btn-sm" onclick="$('formLoaiSuCo').style.display='none'">Huỷ</button>
+        </div>
       </div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <h3 style="font-size:18px;margin-bottom:6px">Quản lý tài khoản</h3>
+      <p style="color:var(--txt-mute);font-size:13.5px;margin-bottom:14px">Thêm tài khoản mới cho quản lý chi nhánh hoặc kỹ thuật, sửa thông tin, đổi mật khẩu, vô hiệu hoá tạm thời hoặc xoá hẳn — có hiệu lực ngay, đăng xuất khỏi mọi thiết bị của người đó lập tức khi vô hiệu hoá/đổi mật khẩu/xoá.</p>
+      <button class="btn btn-y btn-sm" style="margin-bottom:14px" onclick="openThemTaiKhoan()">+ Thêm tài khoản</button>
+      <button class="btn btn-ghost btn-sm" style="margin-bottom:14px;margin-left:8px;color:var(--bad)" onclick="chanBamKep(this,resetAllPassUI)">🔑 Đặt lại mật khẩu hàng loạt</button>
+      <div class="toolbar" style="margin-bottom:12px">
+        <input id="qTaiKhoan" placeholder="Tìm tên, tài khoản, chi nhánh…" style="flex:1;min-width:180px" oninput="soHienTaiKhoan=SO_MOI_TRANG;drawTaiKhoanList()">
+        <select id="fTaiKhoanVaiTro" onchange="soHienTaiKhoan=SO_MOI_TRANG;drawTaiKhoanList()">
+          <option value="">Mọi vai trò</option>
+          <option value="admin">Quản trị</option>
+          <option value="manager">Quản lý chi nhánh</option>
+          <option value="kythuat">Kỹ thuật viên</option>
+          <option value="kythuat_mang">Kỹ thuật mạng</option>
+        </select>
+      </div>
+      <div id="listTaiKhoan"></div>
+
+      <div class="form-card" id="formTaiKhoan" style="display:none;margin-top:14px;padding:16px;max-width:640px">
+        <h3 id="tkTieuDe" style="font-size:15px;margin-bottom:12px">Thêm tài khoản mới</h3>
+        <div class="field">
+          <label for="tkTaikhoan">Tên đăng nhập <span class="req" style="color:var(--bad)">*</span></label>
+          <input id="tkTaikhoan" placeholder="chỉ chữ thường/số, vd: kythuat3" maxlength="40" autocapitalize="none" spellcheck="false">
+        </div>
+        <div class="field">
+          <label for="tkHoten">Họ tên <span class="req" style="color:var(--bad)">*</span></label>
+          <input id="tkHoten" maxlength="60">
+        </div>
+        <div class="field">
+          <label>Vai trò <span class="req" style="color:var(--bad)">*</span></label>
+          <div id="tkVaiTroPick" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+        </div>
+        <div class="field" id="tkChiNhanhWrap">
+          <label for="tkChiNhanh">Chi nhánh phụ trách <span class="req" style="color:var(--bad)">*</span></label>
+          <select id="tkChiNhanh"><option value="">— Chọn chi nhánh —</option></select>
+          <div style="font-size:12px;color:var(--txt-mute);margin-top:4px">Với kỹ thuật viên: chọn chi nhánh xuất phát (điểm tham chiếu tính khoảng cách điều phối), không nhất thiết là chi nhánh cố định.</div>
+        </div>
+        <div class="field" id="tkSieuAdminWrap" style="display:none">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="tkSieuAdmin" style="width:18px;height:18px">
+            🌟 Siêu admin (được xoá sự cố báo nhầm/trùng lặp)
+          </label>
+          <div style="font-size:12px;color:var(--txt-mute);margin-top:4px">Chỉ nên đánh dấu cho 1-2 admin thật sự tin cậy — xoá sự cố là hành động khó hoàn tác qua giao diện. Các admin khác vẫn làm được mọi việc khác bình thường, chỉ không thấy nút xoá.</div>
+        </div>
+        <div class="field">
+          <label for="tkEmail">Email (dùng cho tính năng quên mật khẩu)</label>
+          <input id="tkEmail" type="email" maxlength="80">
+        </div>
+        <div class="field" id="tkMatKhauWrap">
+          <label for="tkMatKhau">Mật khẩu ban đầu</label>
+          <input id="tkMatKhau" placeholder="Boom@2026" maxlength="60">
+          <div style="font-size:12px;color:var(--txt-mute);margin-top:4px">Để trống sẽ dùng mật khẩu mặc định <b>Boom@2026</b> — nên đổi lại ngay sau lần đăng nhập đầu tiên.</div>
+        </div>
+        <div class="bk-act" style="margin-top:6px">
+          <button class="btn btn-y btn-sm" onclick="chanBamKep(this,submitTaiKhoan)">Lưu</button>
+          <button class="btn btn-ghost btn-sm" onclick="$('formTaiKhoan').style.display='none'">Huỷ</button>
+        </div>
       </div>
     </div>
 
@@ -747,44 +797,6 @@ th{color:var(--txt-mute);font-weight:600;font-size:12.5px;text-transform:upperca
       </div>
     </div>
 
-    <div class="form-card ff-collapse">
-      <button class="ff-head" onclick="this.closest('.form-card').classList.toggle('open')">
-        <div>
-          <h3 style="font-size:18px;margin-bottom:6px">Danh mục loại sự cố</h3>
-          <p style="color:var(--txt-mute);font-size:13.5px">Thêm/sửa/ẩn loại sự cố dùng trong form Báo sự cố.</p>
-        </div>
-        <span class="ff-toggle"><span class="ff-txt-closed">Xem thêm</span><span class="ff-txt-open">Thu gọn</span><span class="ff-chevron">▾</span></span>
-      </button>
-      <div class="ff-body">
-      <p style="color:var(--txt-mute);font-size:13.5px;margin-bottom:14px">Thêm loại sự cố hay gặp, sửa mức độ ưu tiên mặc định, hoặc ẩn loại không còn dùng — áp dụng ngay cho form Báo sự cố, không cần sửa code.</p>
-      <div id="listLoaiSuCo" style="margin-bottom:14px"></div>
-      <button class="btn btn-y btn-sm" onclick="openThemLoaiSuCo()">+ Thêm loại sự cố</button>
-
-      <div class="form-card" id="formLoaiSuCo" style="display:none;margin-top:14px;padding:16px;max-width:640px">
-        <h3 id="lscTieuDe" style="font-size:15px;margin-bottom:12px">Thêm loại sự cố mới</h3>
-        <div class="field">
-          <label for="lscTen">Tên hiển thị</label>
-          <input id="lscTen" placeholder="vd: Hỏng máy lạnh phòng VIP" maxlength="80">
-        </div>
-        <div class="field">
-          <label>Mức độ ưu tiên mặc định</label>
-          <div id="lscMucDoPick" style="display:flex;gap:8px;flex-wrap:wrap"></div>
-        </div>
-        <div class="field">
-          <label for="lscLoaiKT">Loại kỹ thuật phụ trách</label>
-          <select id="lscLoaiKT">
-            <option value="chung">Kỹ thuật chung</option>
-            <option value="mang">Kỹ thuật mạng</option>
-          </select>
-        </div>
-        <div class="bk-act" style="margin-top:6px">
-          <button class="btn btn-y btn-sm" onclick="chanBamKep(this,submitLoaiSuCo)">Lưu</button>
-          <button class="btn btn-ghost btn-sm" onclick="$('formLoaiSuCo').style.display='none'">Huỷ</button>
-        </div>
-      </div>
-      </div>
-    </div>
-
     <div class="form-card ff-collapse" style="max-width:560px">
       <button class="ff-head" onclick="this.closest('.form-card').classList.toggle('open')">
         <div>
@@ -899,114 +911,28 @@ th{color:var(--txt-mute);font-weight:600;font-size:12.5px;text-transform:upperca
       </div>
     </div>
 
-    <div class="form-card">
-      <h3 style="font-size:18px;margin-bottom:6px">Quản lý tài khoản</h3>
-      <p style="color:var(--txt-mute);font-size:13.5px;margin-bottom:14px">Thêm tài khoản mới cho quản lý chi nhánh hoặc kỹ thuật, sửa thông tin, đổi mật khẩu, vô hiệu hoá tạm thời hoặc xoá hẳn — có hiệu lực ngay, đăng xuất khỏi mọi thiết bị của người đó lập tức khi vô hiệu hoá/đổi mật khẩu/xoá.</p>
-      <button class="btn btn-y btn-sm" style="margin-bottom:14px" onclick="openThemTaiKhoan()">+ Thêm tài khoản</button>
-      <button class="btn btn-ghost btn-sm" style="margin-bottom:14px;margin-left:8px;color:var(--bad)" onclick="chanBamKep(this,resetAllPassUI)">🔑 Đặt lại mật khẩu hàng loạt</button>
-      <div class="toolbar" style="margin-bottom:12px">
-        <input id="qTaiKhoan" placeholder="Tìm tên, tài khoản, chi nhánh…" style="flex:1;min-width:180px" oninput="soHienTaiKhoan=SO_MOI_TRANG;drawTaiKhoanList()">
-        <select id="fTaiKhoanVaiTro" onchange="soHienTaiKhoan=SO_MOI_TRANG;drawTaiKhoanList()">
-          <option value="">Mọi vai trò</option>
-          <option value="admin">Quản trị</option>
-          <option value="manager">Quản lý chi nhánh</option>
-          <option value="kythuat">Kỹ thuật viên</option>
-          <option value="kythuat_mang">Kỹ thuật mạng</option>
-        </select>
-      </div>
-      <div id="listTaiKhoan"></div>
-
-      <div class="form-card" id="formTaiKhoan" style="display:none;margin-top:14px;padding:16px;max-width:640px">
-        <h3 id="tkTieuDe" style="font-size:15px;margin-bottom:12px">Thêm tài khoản mới</h3>
-        <div class="field">
-          <label for="tkTaikhoan">Tên đăng nhập <span class="req" style="color:var(--bad)">*</span></label>
-          <input id="tkTaikhoan" placeholder="chỉ chữ thường/số, vd: kythuat3" maxlength="40" autocapitalize="none" spellcheck="false">
-        </div>
-        <div class="field">
-          <label for="tkHoten">Họ tên <span class="req" style="color:var(--bad)">*</span></label>
-          <input id="tkHoten" maxlength="60">
-        </div>
-        <div class="field">
-          <label>Vai trò <span class="req" style="color:var(--bad)">*</span></label>
-          <div id="tkVaiTroPick" style="display:flex;gap:8px;flex-wrap:wrap"></div>
-        </div>
-        <div class="field" id="tkChiNhanhWrap">
-          <label for="tkChiNhanh">Chi nhánh phụ trách <span class="req" style="color:var(--bad)">*</span></label>
-          <select id="tkChiNhanh"><option value="">— Chọn chi nhánh —</option></select>
-          <div style="font-size:12px;color:var(--txt-mute);margin-top:4px">Với kỹ thuật viên: chọn chi nhánh xuất phát (điểm tham chiếu tính khoảng cách điều phối), không nhất thiết là chi nhánh cố định.</div>
-        </div>
-        <div class="field" id="tkSieuAdminWrap" style="display:none">
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-            <input type="checkbox" id="tkSieuAdmin" style="width:18px;height:18px">
-            🌟 Siêu admin (được xoá sự cố báo nhầm/trùng lặp)
-          </label>
-          <div style="font-size:12px;color:var(--txt-mute);margin-top:4px">Chỉ nên đánh dấu cho 1-2 admin thật sự tin cậy — xoá sự cố là hành động khó hoàn tác qua giao diện. Các admin khác vẫn làm được mọi việc khác bình thường, chỉ không thấy nút xoá.</div>
-        </div>
-        <div class="field">
-          <label for="tkEmail">Email (dùng cho tính năng quên mật khẩu)</label>
-          <input id="tkEmail" type="email" maxlength="80">
-        </div>
-        <div class="field" id="tkMatKhauWrap">
-          <label for="tkMatKhau">Mật khẩu ban đầu</label>
-          <input id="tkMatKhau" placeholder="Boom@2026" maxlength="60">
-          <div style="font-size:12px;color:var(--txt-mute);margin-top:4px">Để trống sẽ dùng mật khẩu mặc định <b>Boom@2026</b> — nên đổi lại ngay sau lần đăng nhập đầu tiên.</div>
-        </div>
-        <div class="bk-act" style="margin-top:6px">
-          <button class="btn btn-y btn-sm" onclick="chanBamKep(this,submitTaiKhoan)">Lưu</button>
-          <button class="btn btn-ghost btn-sm" onclick="$('formTaiKhoan').style.display='none'">Huỷ</button>
-        </div>
-      </div>
-    </div>
-    </div>
-
-    <div class="form-card ff-collapse" style="max-width:560px">
+    <div class="form-card ff-collapse">
       <button class="ff-head" onclick="this.closest('.form-card').classList.toggle('open')">
         <div>
-          <h3 style="font-size:18px;margin-bottom:6px">Đổi mật khẩu của tôi</h3>
-          <p style="color:var(--txt-mute);font-size:13.5px">Tài khoản đang đăng nhập: <span id="tkmTaiKhoanHienTai" style="color:var(--txt)"></span></p>
+          <h3 style="font-size:18px;margin-bottom:6px">Chức năng giữ phòng đặt chỗ</h3>
+          <p style="color:var(--txt-mute);font-size:13.5px">Bật/tắt nút "Giữ phòng" trên trang khách.</p>
         </div>
         <span class="ff-toggle"><span class="ff-txt-closed">Xem thêm</span><span class="ff-txt-open">Thu gọn</span><span class="ff-chevron">▾</span></span>
       </button>
       <div class="ff-body">
-      <p style="color:var(--txt-mute);font-size:13.5px;margin-bottom:10px">Đổi xong sẽ tự đăng xuất các thiết bị khác, không đăng xuất thiết bị đang dùng.</p>
-      <p id="dmkTrangThai" style="font-size:12.5px;margin-bottom:14px"></p>
-      <div id="dmkKhoiForm">
-      <div class="field">
-        <label for="tkmMatKhauCu">Mật khẩu hiện tại</label>
-        <div class="pw-wrap">
-          <input id="tkmMatKhauCu" type="password" maxlength="60" autocomplete="current-password">
-          <button type="button" class="pw-eye" onclick="toggleMatKhauHien(this,'tkmMatKhauCu')" aria-label="Hiện/ẩn mật khẩu">🙈</button>
+      <p style="color:var(--txt-mute);font-size:13.5px">Khi tắt, trang khách sẽ ẩn nút "Giữ phòng" và máy chủ từ chối mọi đơn mới gửi lên. Đơn cũ vẫn xem và xử lý bình thường trong các tab bên trên.</p>
+      <div class="switch-row">
+        <div>
+          <b id="bkStatusTxt">Đang bật</b>
+          <div style="font-size:12.5px;color:var(--txt-mute)">Khách có thể giữ phòng qua trang chủ</div>
         </div>
-      </div>
-      <div class="field">
-        <label for="tkmMatKhauMoi">Mật khẩu mới (tối thiểu 4 ký tự)</label>
-        <div class="pw-wrap">
-          <input id="tkmMatKhauMoi" type="password" maxlength="60" autocomplete="new-password">
-          <button type="button" class="pw-eye" onclick="toggleMatKhauHien(this,'tkmMatKhauMoi')" aria-label="Hiện/ẩn mật khẩu">🙈</button>
-        </div>
+        <label class="switch">
+          <input type="checkbox" id="bkToggle" checked onchange="toggleBookingSetting()">
+          <span class="track"></span>
+        </label>
       </div>
       </div>
-      <button class="btn btn-y btn-sm" onclick="chanBamKep(this,tuDoiMatKhau)">Đổi mật khẩu</button>
-
-      <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--line-soft)">
-        <label style="display:block;margin-bottom:4px">🔐 Đăng nhập nhanh bằng vân tay / khuôn mặt</label>
-        <p id="vtTrangThai" style="font-size:12.5px;color:var(--txt-mute);margin-bottom:10px">Đang kiểm tra thiết bị…</p>
-
-        <div id="vtKhoiBat" style="display:none">
-          <div class="field">
-            <label for="vtMatKhauXacNhan">Nhập mật khẩu hiện tại để bật</label>
-            <div class="pw-wrap">
-              <input id="vtMatKhauXacNhan" type="password" maxlength="60" autocomplete="current-password">
-              <button type="button" class="pw-eye" onclick="toggleMatKhauHien(this,'vtMatKhauXacNhan')" aria-label="Hiện/ẩn mật khẩu">🙈</button>
-            </div>
-          </div>
-          <button class="btn btn-y btn-sm" onclick="batVanTay()" id="vtBatBtn">Bật vân tay trên thiết bị này</button>
-        </div>
-        <button class="btn btn-ghost btn-sm" id="vtTatBtn" style="display:none" onclick="tatVanTay()">Tắt vân tay trên thiết bị này</button>
-
-        <p style="font-size:12px;color:var(--txt-mute);margin-top:10px">Đây là lớp mở khoá cục bộ ngay trên máy này bằng vân tay/khuôn mặt sẵn có của điện thoại — không phải xác thực với máy chủ. Mật khẩu thật vẫn luôn được máy chủ kiểm tra lại như cũ mỗi lần đăng nhập. Cần bật riêng trên từng thiết bị. Đổi mật khẩu ở trên sẽ tự cập nhật cho vân tay trên thiết bị này (nếu đang bật) — không cần bật lại.</p>
-      </div>
-      </div>
+    </div>
     </div>
 
     <div id="cfgTelegramWrap" style="display:none">
@@ -1064,8 +990,82 @@ th{color:var(--txt-mute);font-weight:600;font-size:12.5px;text-transform:upperca
         </div>
       </div>
     </div>
-  </div>
-</div>
+
+    <div class="form-card ff-collapse" style="max-width:560px">
+      <button class="ff-head" onclick="this.closest('.form-card').classList.toggle('open')">
+        <div>
+          <h3 style="font-size:18px;margin-bottom:6px">Đổi mật khẩu của tôi</h3>
+          <p style="color:var(--txt-mute);font-size:13.5px">Tài khoản đang đăng nhập: <span id="tkmTaiKhoanHienTai" style="color:var(--txt)"></span></p>
+        </div>
+        <span class="ff-toggle"><span class="ff-txt-closed">Xem thêm</span><span class="ff-txt-open">Thu gọn</span><span class="ff-chevron">▾</span></span>
+      </button>
+      <div class="ff-body">
+      <p style="color:var(--txt-mute);font-size:13.5px;margin-bottom:10px">Đổi xong sẽ tự đăng xuất các thiết bị khác, không đăng xuất thiết bị đang dùng.</p>
+      <p id="dmkTrangThai" style="font-size:12.5px;margin-bottom:14px"></p>
+      <div id="dmkKhoiForm">
+      <div class="field">
+        <label for="tkmMatKhauCu">Mật khẩu hiện tại</label>
+        <div class="pw-wrap">
+          <input id="tkmMatKhauCu" type="password" maxlength="60" autocomplete="current-password">
+          <button type="button" class="pw-eye" onclick="toggleMatKhauHien(this,'tkmMatKhauCu')" aria-label="Hiện/ẩn mật khẩu">🙈</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="tkmMatKhauMoi">Mật khẩu mới (tối thiểu 4 ký tự)</label>
+        <div class="pw-wrap">
+          <input id="tkmMatKhauMoi" type="password" maxlength="60" autocomplete="new-password">
+          <button type="button" class="pw-eye" onclick="toggleMatKhauHien(this,'tkmMatKhauMoi')" aria-label="Hiện/ẩn mật khẩu">🙈</button>
+        </div>
+      </div>
+      </div>
+      <button class="btn btn-y btn-sm" onclick="chanBamKep(this,tuDoiMatKhau)">Đổi mật khẩu</button>
+
+      <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--line-soft)">
+        <label style="display:block;margin-bottom:4px">🔐 Đăng nhập nhanh bằng vân tay / khuôn mặt</label>
+        <p id="vtTrangThai" style="font-size:12.5px;color:var(--txt-mute);margin-bottom:10px">Đang kiểm tra thiết bị…</p>
+
+        <div id="vtKhoiBat" style="display:none">
+          <div class="field">
+            <label for="vtMatKhauXacNhan">Nhập mật khẩu hiện tại để bật</label>
+            <div class="pw-wrap">
+              <input id="vtMatKhauXacNhan" type="password" maxlength="60" autocomplete="current-password">
+              <button type="button" class="pw-eye" onclick="toggleMatKhauHien(this,'vtMatKhauXacNhan')" aria-label="Hiện/ẩn mật khẩu">🙈</button>
+            </div>
+          </div>
+          <button class="btn btn-y btn-sm" onclick="batVanTay()" id="vtBatBtn">Bật vân tay trên thiết bị này</button>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="vtTatBtn" style="display:none" onclick="tatVanTay()">Tắt vân tay trên thiết bị này</button>
+
+        <p style="font-size:12px;color:var(--txt-mute);margin-top:10px">Đây là lớp mở khoá cục bộ ngay trên máy này bằng vân tay/khuôn mặt sẵn có của điện thoại — không phải xác thực với máy chủ. Mật khẩu thật vẫn luôn được máy chủ kiểm tra lại như cũ mỗi lần đăng nhập. Cần bật riêng trên từng thiết bị. Đổi mật khẩu ở trên sẽ tự cập nhật cho vân tay trên thiết bị này (nếu đang bật) — không cần bật lại.</p>
+      </div>
+      </div>
+    </div>
+
+    <div class="caidat-admin-only" style="display:none">
+    <div class="form-card ff-collapse">
+      <button class="ff-head" onclick="this.closest('.form-card').classList.toggle('open'); if(this.closest('.form-card').classList.contains('open')) xemLuuLuongTruyCap();">
+        <div>
+          <h3 style="font-size:18px;margin-bottom:6px">📊 Lưu lượng truy cập</h3>
+          <p style="color:var(--txt-mute);font-size:13.5px">Số lượt đăng nhập theo ngày/giờ/chi nhánh/tài khoản — chỉ để xem xu hướng, không có hành động nào ở đây.</p>
+        </div>
+        <span class="ff-toggle"><span class="ff-txt-closed">Xem thêm</span><span class="ff-txt-open">Thu gọn</span><span class="ff-chevron">▾</span></span>
+      </button>
+      <div class="ff-body">
+        <div class="toolbar" style="margin-bottom:12px">
+          <select id="ttNguonDuLieu" onchange="xemLuuLuongTruyCap()">
+            <option value="dangnhap">🔑 Đăng nhập (nội bộ)</option>
+            <option value="trangchu">🌐 Trang chủ (khách)</option>
+          </select>
+          <select id="ttSoNgay" onchange="xemLuuLuongTruyCap()">
+            <option value="7">7 ngày gần nhất</option>
+            <option value="30" selected>30 ngày gần nhất</option>
+            <option value="90">90 ngày gần nhất</option>
+          </select>
+        </div>
+        <div id="ttThan"><div class="sk" style="height:140px"></div></div>
+      </div>
+    </div>
+    </div>
 </div>
 
 <div id="modalOverlay" style="display:none" onclick="if(event.target===this) dongLichSuNut()">
@@ -1674,7 +1674,7 @@ async function enterApp(){
   // nhánh/Telegram của admin trên máy đó, phải bấm F5 mới hết. Sửa: luôn gán cả 2 nhánh mỗi lần vào.
   const laAdmin = SESSION.role === 'admin';
   $('fBranch').style.display = laAdmin ? '' : 'none';
-  $('caidatAdmin').style.display = laAdmin ? '' : 'none';
+  document.querySelectorAll('.caidat-admin-only').forEach(el => el.style.display = laAdmin ? '' : 'none');
   $('cfgTelegramWrap').style.display = laAdmin ? '' : 'none';
   // Các nút chuyển view (Bảng/Bản đồ/Danh sách/Báo sự cố) được dựng trong capNhatNutChuyenView(),
   // gọi SAU khi khoiDongDuLieu() đã nạp xong PUBLIC_SETTINGS — vì quyền xem bản đồ của kỹ thuật viên
