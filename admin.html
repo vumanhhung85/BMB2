@@ -94,6 +94,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 #app{display:none}
 header{position:sticky;top:0;z-index:100;background:rgba(20,6,31,.9);backdrop-filter:blur(16px);
   border-bottom:1px solid var(--line-soft)}
+#formTaoSuCo,#formDieuPhoi,#formBaoXong,#formChiNhanh,#formTaiKhoan,#formLoaiSuCo{scroll-margin-top:140px}
 .topbar{display:flex;align-items:center;gap:14px;height:66px}
 .topbar img{height:38px}
 .who{margin-left:auto;display:flex;align-items:center;gap:11px;font-size:13.5px}
@@ -854,6 +855,27 @@ th{color:var(--txt-mute);font-weight:600;font-size:12.5px;text-transform:upperca
         <div class="field" style="margin:0"><label>&nbsp;</label><div style="padding:12px 0;font-weight:700">🟢 Thấp</div></div>
         <div class="field" style="margin:0"><label style="color:var(--txt-mute)">Không cấp bách</label><div style="padding:12px 0;color:var(--txt-mute);font-size:13px">Gộp đợt bảo trì định kỳ</div></div>
         <div class="field" style="margin:0"><label for="slaM4XL">Xử lý xong trong (ngày)</label><input id="slaM4XL" type="number" min="0" step="1"></div>
+      </div>
+
+      <div style="border-top:1px solid var(--line-soft);margin:4px 0 16px"></div>
+      <p style="color:var(--txt-mute);font-size:13.5px;margin-bottom:14px">
+        <b>Cảnh báo tự động qua Telegram</b> — ticket quá hạn "Tiếp nhận" ở trên sẽ tự nhắn nhóm ngay khi phát hiện (mỗi ticket đúng 1 lần). Riêng ticket còn mở quá lâu thì gộp thành 1 bản điểm danh, gửi đúng giờ/thứ chọn dưới đây thay vì nhắc liên tục cả ngày.
+      </p>
+      <div class="row3" style="align-items:end;margin-bottom:10px">
+        <div class="field" style="margin:0"><label for="tdNguongNgay">Tồn đọng quá (ngày)</label><input id="tdNguongNgay" type="number" min="1" max="60" step="1"></div>
+        <div class="field" style="margin:0"><label for="tdGio">Giờ gửi (0–23)</label><input id="tdGio" type="number" min="0" max="23" step="1"></div>
+        <div class="field" style="margin:0">
+          <label>Gửi vào ngày</label>
+          <div style="display:flex;gap:4px;flex-wrap:wrap">
+            <label style="display:flex;align-items:center;gap:3px;font-size:12.5px;cursor:pointer"><input type="checkbox" class="tdThu" value="1" style="width:15px;height:15px">T2</label>
+            <label style="display:flex;align-items:center;gap:3px;font-size:12.5px;cursor:pointer"><input type="checkbox" class="tdThu" value="2" style="width:15px;height:15px">T3</label>
+            <label style="display:flex;align-items:center;gap:3px;font-size:12.5px;cursor:pointer"><input type="checkbox" class="tdThu" value="3" style="width:15px;height:15px">T4</label>
+            <label style="display:flex;align-items:center;gap:3px;font-size:12.5px;cursor:pointer"><input type="checkbox" class="tdThu" value="4" style="width:15px;height:15px">T5</label>
+            <label style="display:flex;align-items:center;gap:3px;font-size:12.5px;cursor:pointer"><input type="checkbox" class="tdThu" value="5" style="width:15px;height:15px">T6</label>
+            <label style="display:flex;align-items:center;gap:3px;font-size:12.5px;cursor:pointer"><input type="checkbox" class="tdThu" value="6" style="width:15px;height:15px">T7</label>
+            <label style="display:flex;align-items:center;gap:3px;font-size:12.5px;cursor:pointer"><input type="checkbox" class="tdThu" value="0" style="width:15px;height:15px">CN</label>
+          </div>
+        </div>
       </div>
       <button class="btn btn-y btn-sm" onclick="chanBamKep(this,luuSLA)">Lưu ngưỡng SLA</button>
       </div>
@@ -1988,7 +2010,7 @@ function openThemChiNhanh(){
   $('cnId').disabled = false;
   cnAnhMoi = null; cnAnhCu = ''; drawCnPhotoBox();
   $('formChiNhanh').style.display='block';
-  $('formChiNhanh').scrollIntoView({behavior:'smooth',block:'center'});
+  requestAnimationFrame(()=>$('formChiNhanh').scrollIntoView({behavior:'smooth',block:'center'}));
 }
 function openSuaChiNhanh(id){
   const c = CHINHANH_LIST.find(x=>x.id===id); if(!c) return;
@@ -2006,7 +2028,7 @@ function openSuaChiNhanh(id){
   $('cnPriority').value = (c.priority && c.priority!==999) ? c.priority : '';
   cnAnhMoi = null; cnAnhCu = c.photo || ''; drawCnPhotoBox();
   $('formChiNhanh').style.display='block';
-  $('formChiNhanh').scrollIntoView({behavior:'smooth',block:'center'});
+  requestAnimationFrame(()=>$('formChiNhanh').scrollIntoView({behavior:'smooth',block:'center'}));
 }
 async function submitChiNhanh(){
   const name = $('cnName').value.trim();
@@ -2589,7 +2611,7 @@ function openTaoSuCo(){
   $('scSubmit').textContent = 'Gửi báo cáo';
   $('scGhiChuSua').style.display = 'none';
   $('formTaoSuCo').style.display='block';
-  $('formTaoSuCo').scrollIntoView({behavior:'smooth',block:'start'});
+  requestAnimationFrame(()=>$('formTaoSuCo').scrollIntoView({behavior:'smooth',block:'start'}));
 }
 /** Chính người đã tạo ticket tự sửa lại nội dung — CHỈ khi ticket còn ở trạng thái 'moi' (nút này chỉ
  *  hiện ra trong sucoHTML() đúng lúc đó, xem ghi chú ở suaSuCo() bên Code.gs). Tái dùng nguyên form
@@ -2612,7 +2634,7 @@ function openSuaSuCo(maSuCo){
   $('scSubmit').textContent = 'Lưu thay đổi';
   $('scGhiChuSua').style.display = '';
   $('formTaoSuCo').style.display='block';
-  $('formTaoSuCo').scrollIntoView({behavior:'smooth',block:'start'});
+  requestAnimationFrame(()=>$('formTaoSuCo').scrollIntoView({behavior:'smooth',block:'start'}));
 }
 function closeTaoSuCo(){ $('formTaoSuCo').style.display='none'; scDangSuaMa = null; }
 function onLoaiSuCoChange(){
@@ -3137,7 +3159,7 @@ function openDieuPhoi(maSuCo){
     '<option value="'+esc(k.user)+'">'+esc(k.hoten)+(k.km!=null?' — cách ~'+k.km.toFixed(1)+'km':'')+'</option>'
   ).join('') : '<option value="">Chưa có kỹ thuật viên phù hợp — tạo tài khoản vai trò kythuat/kythuat_mang trước</option>';
   $('formDieuPhoi').style.display='block';
-  $('formDieuPhoi').scrollIntoView({behavior:'smooth',block:'start'});
+  requestAnimationFrame(()=>$('formDieuPhoi').scrollIntoView({behavior:'smooth',block:'start'}));
 }
 async function submitDieuPhoi(){
   const kt = $('dpKyThuat').value;
@@ -3461,7 +3483,7 @@ function openBaoXong(maSuCo){
   const t = SUCO.find(x=>x.maSuCo===maSuCo);
   $('bxTicketInfo').textContent = maSuCo + (t?' — '+t.chinhanhTen+(t.phong?' / '+t.phong:''):'');
   $('formBaoXong').style.display='block';
-  $('formBaoXong').scrollIntoView({behavior:'smooth',block:'start'});
+  requestAnimationFrame(()=>$('formBaoXong').scrollIntoView({behavior:'smooth',block:'start'}));
 }
 async function submitBaoXong(){
   // Không còn bắt buộc ảnh (đổi 17/08/2026) — chỉ NHẮC, vì có những lỗi không chụp được gì (sự cố
@@ -3612,6 +3634,10 @@ function fillCfgInputs(){
   $('slaM3TN').value = sla[3] ? sla[3].tiepNhan : 480;
   $('slaM3XL').value = sla[3] ? Math.round(sla[3].xuLy/60*10)/10 : 48;
   $('slaM4XL').value = sla[4] ? Math.round(sla[4].xuLy/1440*10)/10 : 14;
+  $('tdNguongNgay').value = PUBLIC_SETTINGS.tondongNguongNgay || 7;
+  $('tdGio').value = PUBLIC_SETTINGS.tondongGio != null ? PUBLIC_SETTINGS.tondongGio : 8;
+  const thuDaChon = String(PUBLIC_SETTINGS.tondongThu || '0,1,2,3,4,5,6').split(',');
+  document.querySelectorAll('.tdThu').forEach(cb => cb.checked = thuDaChon.includes(cb.value));
   $('cfgKtBanDo').checked = !!PUBLIC_SETTINGS.kythuatXemBanDo;
   $('cfgKtTuNhan').checked = !!PUBLIC_SETTINGS.kythuatTuNhanViec;
   $('cfgKtViTri').checked = !!PUBLIC_SETTINGS.kythuatXemViTriDongNghiep;
@@ -3653,9 +3679,14 @@ async function luuSLA(){
     ['sla_m3_tiepnhan_phut', Number($('slaM3TN').value)],
     ['sla_m3_xuly_phut',     Math.round(Number($('slaM3XL').value)*60)],
     ['sla_m4_tiepnhan_phut', 0],
-    ['sla_m4_xuly_phut',     Math.round(Number($('slaM4XL').value)*1440)]
+    ['sla_m4_xuly_phut',     Math.round(Number($('slaM4XL').value)*1440)],
+    ['tondong_nguong_ngay',  Number($('tdNguongNgay').value)],
+    ['tondong_gio',          Number($('tdGio').value)],
+    ['tondong_thu',          [...document.querySelectorAll('.tdThu:checked')].map(cb=>cb.value).join(',')]
   ];
-  if(fields.some(f=>isNaN(f[1]) || f[1]<0)) return toast('Nhập số hợp lệ (≥ 0) cho mọi ô.','bad');
+  if(fields.slice(0,-1).some(f=>isNaN(f[1]) || f[1]<0)) return toast('Nhập số hợp lệ (≥ 0) cho mọi ô.','bad');
+  if($('tdGio').value==='' || Number($('tdGio').value)<0 || Number($('tdGio').value)>23) return toast('Giờ gửi phải từ 0 đến 23.','bad');
+  if(!fields[fields.length-1][1]) return toast('Chọn ít nhất 1 ngày để gửi bản tổng hợp tồn đọng.','bad');
   try{
     for(const [key,value] of fields){ const j = await api({action:'settings_set', key, value:String(value)}); if(!j.ok) throw new Error(j.error); }
     await loadPublicSettings();
@@ -3910,7 +3941,7 @@ function openThemTaiKhoan(){
   fillTkChiNhanhSelect('');
   renderTkVaiTroPick();
   $('formTaiKhoan').style.display='block';
-  $('formTaiKhoan').scrollIntoView({behavior:'smooth',block:'center'});
+  requestAnimationFrame(()=>$('formTaiKhoan').scrollIntoView({behavior:'smooth',block:'center'}));
 }
 
 function openSuaTaiKhoan(taikhoan){
@@ -3924,7 +3955,7 @@ function openSuaTaiKhoan(taikhoan){
   fillTkChiNhanhSelect(u.chinhanhId||'');
   renderTkVaiTroPick();
   $('formTaiKhoan').style.display='block';
-  $('formTaiKhoan').scrollIntoView({behavior:'smooth',block:'center'});
+  requestAnimationFrame(()=>$('formTaiKhoan').scrollIntoView({behavior:'smooth',block:'center'}));
 }
 
 async function submitTaiKhoan(){
@@ -3993,7 +4024,7 @@ function openThemLoaiSuCo(){
   $('lscTen').value = ''; $('lscLoaiKT').value = 'chung';
   renderLscMucDoPick();
   $('formLoaiSuCo').style.display='block';
-  $('formLoaiSuCo').scrollIntoView({behavior:'smooth',block:'center'});
+  requestAnimationFrame(()=>$('formLoaiSuCo').scrollIntoView({behavior:'smooth',block:'center'}));
 }
 function openSuaLoaiSuCo(ma){
   const l = LOAI_SUCO_LIST.find(x=>x.ma===ma); if(!l) return;
@@ -4002,7 +4033,7 @@ function openSuaLoaiSuCo(ma){
   $('lscTen').value = l.ten; $('lscLoaiKT').value = l.loaiKT;
   renderLscMucDoPick();
   $('formLoaiSuCo').style.display='block';
-  $('formLoaiSuCo').scrollIntoView({behavior:'smooth',block:'center'});
+  requestAnimationFrame(()=>$('formLoaiSuCo').scrollIntoView({behavior:'smooth',block:'center'}));
 }
 async function submitLoaiSuCo(){
   const ten = $('lscTen').value.trim();
