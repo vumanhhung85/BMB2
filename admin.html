@@ -877,7 +877,11 @@ th{color:var(--txt-mute);font-weight:600;font-size:12.5px;text-transform:upperca
           </div>
         </div>
       </div>
-      <button class="btn btn-y btn-sm" onclick="chanBamKep(this,luuSLA)">Lưu ngưỡng SLA</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-y btn-sm" onclick="chanBamKep(this,luuSLA)">Lưu ngưỡng SLA</button>
+        <button class="btn btn-sm" onclick="chanBamKep(this,kiemTraTacVuNen)">🩺 Kiểm tra &amp; quét ngay</button>
+      </div>
+      <div id="slaNenTrangThai" style="margin-top:12px;font-size:13px;line-height:1.6;color:var(--txt-mute)"></div>
       </div>
     </div>
 
@@ -1600,7 +1604,10 @@ async function loadPublicSettings(){
   try{
     const r = await fetch(CFG.API + '?action=settings', {method:'GET'});
     const j = await r.json();
-    if(j.ok){ PUBLIC_SETTINGS = j.data; }
+    // GỘP thay vì ghi đè (sửa 23/09/2026): GET ?action=settings là bản CÔNG KHAI, không có 3 cài đặt
+    // tồn đọng (giờ/thứ/ngưỡng) — ghi đè làm form SLA hiện lại giá trị mặc định, bấm Lưu lần sau là
+    // vô tình trả cả 3 về mặc định.
+    if(j.ok){ PUBLIC_SETTINGS = Object.assign({}, PUBLIC_SETTINGS, j.data); }
   }catch(e){}
 }
 loadPublicSettings();
@@ -3530,7 +3537,7 @@ async function loadBookingSetting(){
   try{
     const r = await fetch(CFG.API + '?action=settings', {method:'GET'});
     const j = await r.json();
-    if(j.ok){ PUBLIC_SETTINGS = j.data; capNhatUIBookingSetting(); }
+    if(j.ok){ PUBLIC_SETTINGS = Object.assign({}, PUBLIC_SETTINGS, j.data); capNhatUIBookingSetting(); }
   }catch(e){}
 }
 
@@ -3644,6 +3651,36 @@ function fillCfgInputs(){
   $('cfgKtTuNhan').checked = !!PUBLIC_SETTINGS.kythuatTuNhanViec;
   $('cfgKtViTri').checked = !!PUBLIC_SETTINGS.kythuatXemViTriDongNghiep;
   $('cfgChuongGiay').value = PUBLIC_SETTINGS.chuongLapKhoangGiay || 25;
+  hienMocCron(PUBLIC_SETTINGS.cronChayCuoi);
+}
+
+/* ─── tác vụ nền SLA: chẩn đoán + quét tay (mới, 23/09/2026) ─── */
+function hienMocCron(isoStr){
+  const el = $('slaNenTrangThai'); if(!el) return;
+  if(!isoStr){ el.innerHTML = '⚠️ <b>Chưa ghi nhận lượt chạy nền nào</b> — Cron Trigger có thể chưa được khai trên Cloudflare. Bấm "Kiểm tra &amp; quét ngay" để xem chi tiết.'; return; }
+  const phut = Math.round((Date.now() - new Date(isoStr).getTime())/60000);
+  const gio = new Date(isoStr).toLocaleString('vi-VN',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'});
+  el.innerHTML = (phut <= 20 ? '✅ Tác vụ nền đang chạy' : '⚠️ Tác vụ nền đã ngừng?') + ' — lần quét gần nhất: <b>' + gio + '</b> (' + phut + ' phút trước).';
+}
+async function kiemTraTacVuNen(){
+  const el = $('slaNenTrangThai'); el.textContent = 'Đang kiểm tra…';
+  try{
+    const j = await api({action:'sla_kiemtra'});
+    if(!j.ok) throw new Error(j.error);
+    const d = [];
+    const ok = (b, t, f) => d.push((b?'✅ ':'❌ ') + (b?t:f));
+    if(j.cronChayCuoi){
+      const phut = Math.round((Date.now()-new Date(j.cronChayCuoi).getTime())/60000);
+      ok(phut <= 20, 'Cron Trigger đang chạy — lần cuối ' + phut + ' phút trước.', 'Cron lần cuối chạy cách đây ' + phut + ' phút — kiểm tra lại Triggers trên Cloudflare.');
+    } else ok(false,'', 'Chưa thấy Cron Trigger chạy lần nào → vào Cloudflare: Worker → Settings → Triggers → Cron Triggers → thêm <b>*/10 * * * *</b>.');
+    ok(j.cotOk, 'Cột sla_canhbao_luc có trong D1' + (j.vuaThemCot ? ' (vừa tự thêm — đây chính là lý do trước giờ không cảnh báo).' : '.'), 'Thiếu cột sla_canhbao_luc và không tự thêm được: ' + (j.loiCot||''));
+    ok(j.tgBat, 'Biến TG_BAT = 1.', 'Biến môi trường TG_BAT chưa = 1 → mọi tin tự động đều bị tắt.');
+    ok(j.tgCauHinh, 'Đã cấu hình bot token + chat id.', 'Chưa cấu hình Telegram (token/chat id).');
+    if(j.loiQuet) ok(false,'', 'Lỗi khi quét: ' + j.loiQuet);
+    else if(j.soQuaHan != null) d.push(j.soQuaHan ? (j.daGui ? '📨 Vừa gửi cảnh báo ' + j.soQuaHan + ' ticket quá hạn vào group.' : '⚠️ Có ' + j.soQuaHan + ' ticket quá hạn nhưng gửi Telegram KHÔNG thành công.') : 'ℹ️ Hiện không có ticket nào quá hạn tiếp nhận (hoặc đã cảnh báo rồi).');
+    (j.loiGanDay||[]).forEach(l => d.push('<span style="opacity:.8">🧾 ' + new Date(l.luc).toLocaleString('vi-VN') + ': ' + esc(l.noiDung) + '</span>'));
+    el.innerHTML = d.join('<br>');
+  }catch(e){ el.textContent = 'Không kiểm tra được: ' + (e.message||e); }
 }
 
 async function luuChuongGiay(){
